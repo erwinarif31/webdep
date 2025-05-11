@@ -32,6 +32,12 @@ class Server {
 
     private routes() {
         this.app.use(new UserController().router);
+        // create simple api /api/test
+        this.app.get("/api/test", (req: Request, res: Response) => {
+            res.status(200).json({
+                message: "Hello World",
+            });
+        });
     }
 
     public run() {
