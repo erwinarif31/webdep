@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+}
+
+model User {
+    id         String   @id @default(uuid())
+    name       String
+    email      String   @unique
+    username   String   @unique
+    password   String
+    created_at DateTime @default(now())
+    updated_at DateTime @default(now())
+
+    @@map("users")
+}
+
+model pages {
+    id                 Int                  @id @default(autoincrement())
+    parent_id          Int?                 @map("parent_id")
+    type               String
+    parent             pages?               @relation("PageHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
+    children           pages[]              @relation("PageHierarchy")
+    program_studi_page study_program_pages?
+    backlink_page      backlink_pages?
+    regular_page       regular_pages?
+    gallery_page       gallery_pages?
+}
+
+model study_program_pages {
+    page_id          Int    @id @map("page_id")
+    study_program_id Int    @map("study_program_id")
+    title_id         String @map("title_id")
+    title_en         String @map("title_en")
+    slug             String
+    cover_photo      String @map("cover_photo")
+    page             pages  @relation(fields: [page_id], references: [id], onDelete: Cascade)
+}
+
+// Backlink Pages table (one-to-one with pages)
+model backlink_pages {
+    page_id       Int    @id @map("page_id")
+    redirect_link String @map("redirect_link")
+    page          pages  @relation(fields: [page_id], references: [id], onDelete: Cascade)
+}
+
+// Regular Pages table (one-to-one with pages)
+model regular_pages {
+    page_id        Int     @id @map("page_id")
+    photo          String
+    content_id     String  @map("content_id")
+    content_en     String  @map("content_en")
+    has_line_above Boolean @map("has_line_above")
+    page           pages   @relation(fields: [page_id], references: [id], onDelete: Cascade)
+}
+
+// Gallery Pages table (one-to-one with pages)
+model gallery_pages {
+    page_id        Int              @id @map("page_id")
+    slug           String
+    cover_photo    String           @map("cover_photo")
+    page           pages            @relation(fields: [page_id], references: [id], onDelete: Cascade)
+    gallery_images gallery_images[]
+}
+
+// Gallery Images table (many-to-one with gallery_pages)
+model gallery_images {
+    id              Int           @id @default(autoincrement())
+    gallery_page_id Int           @map("gallery_page_id")
+    image           String
+    gallery_page    gallery_pages @relation(fields: [gallery_page_id], references: [page_id], onDelete: Cascade)
+}
+
+// Study Programs table
+model study_programs {
+    id                  Int    @id @default(autoincrement())
+    photo               String
+    name_id             String @map("name_id")
+    name_en             String @map("name_en")
+    phone_number        String @map("phone_number")
+    email               String
+    head_name           String @map("head_name")
+    head_photo          String @map("head_photo")
+    description_id      String @map("description_id")
+    description_en      String @map("description_en")
+    graduate_profile_id String @map("graduate_profile_id")
+    graduate_profile_en String @map("graduate_profile_en")
+    website_link        String @map("website_link")
+}
+
+// News table
+model news {
+    id         Int      @id @default(autoincrement())
+    title_id   String   @map("title_id")
+    title_en   String   @map("title_en")
+    photo      String
+    content_id String   @map("content_id")
+    content_en String   @map("content_en")
+    created_at DateTime @map("created_at")
+}
+
+// Announcements table
+model announcements {
+    id         Int      @id @default(autoincrement())
+    title_id   String   @map("title_id")
+    title_en   String   @map("title_en")
+    photo      String
+    content_id String   @map("content_id")
+    content_en String   @map("content_en")
+    created_at DateTime @map("created_at")
+}
+
+// Carousel Items table
+model carousel_items {
+    id       Int    @id @default(autoincrement())
+    title_id String @map("title_id")
+    title_en String @map("title_en")
+    image    String
+}
+
+// Department Info table (singleton with default id of 1)
+model department_info {
+    id                 Int    @id @default(1)
+    vision_id          String @map("vision_id")
+    vision_en          String @map("vision_en")
+    mission_id         String @map("mission_id")
+    mission_en         String @map("mission_en")
+    goals_id           String @map("goals_id")
+    goals_en           String @map("goals_en")
+    total_students     Int    @map("total_students")
+    alumni             Int
+    lecturers          Int
+    staff              Int
+    contact_email      String @map("contact_email")
+    contact_email_link String @map("contact_email_link")
+    contact_phone      String @map("contact_phone")
+    contact_phone_link String @map("contact_phone_link")
+}
