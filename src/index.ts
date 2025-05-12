@@ -6,11 +6,10 @@ import {
 import { UserController } from "./api/users/user.controller";
 import Logger from "./shared/utils/logger";
 import morganMiddleware from "./shared/middlewares/morgan.middleware";
-
 const cors = require("cors");
 
 class Server {
-    private app: Application;
+    public app: Application;
 
     constructor() {
         this.app = express();
@@ -40,12 +39,20 @@ class Server {
         });
     }
 
-    public run() {
-        this.app.listen(3001, () => {
-            Logger.debug(`Server is up and running @ http://localhost:3001`);
+    public run(port: number = 3001) {
+        this.app.listen(port, () => {
+            Logger.debug(`Server is up and running @ http://localhost:${port}`);
         });
     }
 }
 
+// Create server instance
 const server = new Server();
-server.run();
+
+// Only start the server when running directly (not when imported)
+if (process.env.NODE_ENV !== "production") {
+    server.run();
+}
+
+// Export for serverless deployment
+export default server.app;
